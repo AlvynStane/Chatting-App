@@ -1,5 +1,8 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:intl/intl.dart';
+import 'package:chat_bubbles/chat_bubbles.dart';
 
 class ChatPage extends StatefulWidget {
   final name;
@@ -12,6 +15,20 @@ class ChatPage extends StatefulWidget {
 }
 
 class _ChatPageState extends State<ChatPage> {
+  late final FocusNode _focusNode = FocusNode(
+    onKey: (FocusNode node, RawKeyEvent evt) {
+      if (!evt.isShiftPressed && evt.logicalKey.keyLabel == 'Enter') {
+        if (evt is RawKeyDownEvent) {
+          if (_messageController.text.isNotEmpty) {
+            _sendMessage(_messageController.text);
+          }
+        }
+        return KeyEventResult.handled;
+      } else {
+        return KeyEventResult.ignored;
+      }
+    },
+  );
   List<Map<String, dynamic>> _messages = [];
   final StreamController<List<Map<String, dynamic>>> _messageStreamController =
       StreamController<List<Map<String, dynamic>>>.broadcast();
@@ -32,8 +49,19 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    _focusNode.addListener(() {
+      if (!_focusNode.hasFocus) {
+        FocusScope.of(context).requestFocus(_focusNode);
+      }
+    });
+  }
+
+  @override
   void dispose() {
     _messageStreamController.close();
+    _focusNode.dispose();
     super.dispose();
   }
 
@@ -43,7 +71,12 @@ class _ChatPageState extends State<ChatPage> {
       appBar: AppBar(
         title: Text(widget.name),
         centerTitle: true,
-        leading: IconButton(icon: Icon(Icons.arrow_back_ios), onPressed: (){Navigator.pop(context);},),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back_ios),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
       ),
       body: Column(
         children: [
@@ -58,16 +91,23 @@ class _ChatPageState extends State<ChatPage> {
                   itemBuilder: (context, index) {
                     final message = messages[index];
                     final isUserMessage = message['sender'] == 'User';
-    
-                    return ListTile(
-                      title: Text(message['text']),
-                      subtitle: Text(
-                        "${isUserMessage ? 'You' : 'Sender'} - ${message['timestamp'].toString()}",
-                      ),
-                      trailing: Icon(
-                        isUserMessage ? Icons.arrow_forward : Icons.arrow_back,
-                        color: isUserMessage ? Colors.blue : Colors.green,
-                      ),
+                    return Column(
+                      crossAxisAlignment: isUserMessage
+                          ? CrossAxisAlignment.end
+                          : CrossAxisAlignment.start,
+                      children: [
+                        BubbleNormal(
+                          text: message['text'],
+                          isSender: isUserMessage ? true : false,
+                          color: isUserMessage ? Colors.grey : Colors.green,
+                          tail: true,
+                        ),
+                        Text(
+                          DateFormat('HH:mm').format(
+                              DateTime.parse(message['timestamp'].toString())),
+                          style: TextStyle(fontSize: 10),
+                        )
+                      ],
                     );
                   },
                 );
@@ -81,6 +121,9 @@ class _ChatPageState extends State<ChatPage> {
                 Expanded(
                   child: TextField(
                     controller: _messageController,
+                    maxLines: null,
+                    autofocus: true,
+                    focusNode: _focusNode,
                     decoration: InputDecoration(hintText: 'Type a message...'),
                   ),
                 ),
@@ -96,40 +139,6 @@ class _ChatPageState extends State<ChatPage> {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class MessageWidget extends StatelessWidget {
-  final String text;
-  final bool isCurrentUser;
-
-  MessageWidget({
-    super.key,
-    required this.text,
-    required this.isCurrentUser,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.all(8.0),
-      alignment: isCurrentUser ? Alignment.centerRight : Alignment.centerLeft,
-      child: Material(
-        borderRadius: BorderRadius.circular(10.0),
-        elevation: 5.0,
-        color: isCurrentUser ? Colors.blue : Colors.green,
-        child: Padding(
-          padding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 15.0),
-          child: Text(
-            text,
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 16.0,
-            ),
-          ),
-        ),
       ),
     );
   }

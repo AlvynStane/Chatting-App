@@ -10,6 +10,10 @@ dependencies:
   flutter:
     sdk: flutter
   provider: ^6.0.5
+  sqflite:
+  path:
+  intl:
+  chat_bubbles:
 
 dev_dependencies:
   flutter_test:
