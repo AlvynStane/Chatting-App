@@ -1,22 +1,48 @@
-import 'dart:ui';
-import 'package:amitofo_chatting/Data/theme.dart';
-import 'package:amitofo_chatting/Pages/allpages.dart';
+import 'package:amitofo_chatting/Constant/color_constants.dart';
+import 'package:amitofo_chatting/Pages/Login/login.dart';
+import 'package:amitofo_chatting/Provider/provider.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-void main() {
-  runApp(MultiProvider(providers: [
-    ChangeNotifierProvider(create: (_) => DarkThemeProvider()),
-  ], child: const MainApp()));
-}
-
-class NoThumbScrollBehavior extends ScrollBehavior {
-  @override
-  Set<PointerDeviceKind> get dragDevices => {
-        PointerDeviceKind.touch,
-        PointerDeviceKind.mouse,
-        PointerDeviceKind.stylus,
-      };
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  final FirebaseFirestore firebaseFirestore = FirebaseFirestore.instance;
+  final FirebaseStorage firebaseStorage = FirebaseStorage.instance;
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(
+          create: (_) => AuthProvider(
+            firebaseAuth: FirebaseAuth.instance,
+            googleSignIn: GoogleSignIn(),
+            prefs: prefs,
+            firebaseFirestore: firebaseFirestore,
+          ),
+        ),
+        Provider<HomeProvider>(
+          create: (_) => HomeProvider(
+            firebaseFirestore: firebaseFirestore,
+          ),
+        ),
+        Provider<ChatProvider>(
+          create: (_) => ChatProvider(
+            prefs: prefs,
+            firebaseFirestore: firebaseFirestore,
+            firebaseStorage: firebaseStorage,
+          ),
+        ),
+      ],
+      child: const MainApp(),
+    ),
+  );
 }
 
 class MainApp extends StatelessWidget {
@@ -24,13 +50,12 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final themeProvider = Provider.of<DarkThemeProvider>(context);
     return MaterialApp(
         debugShowCheckedModeBanner: false,
-        scrollBehavior: NoThumbScrollBehavior().copyWith(scrollbars: false),
-        theme: themeProvider.darkTheme == true
-            ? themeProvider.dark
-            : themeProvider.light,
-        home: AllPages());
+        theme: ThemeData(
+          primaryColor: ColorConstants.primaryColor,
+          primarySwatch: MaterialColor(0xfff49f1c, ColorConstants.swatchColor),
+        ),
+        home: const Login());
   }
 }

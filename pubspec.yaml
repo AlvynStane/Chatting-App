@@ -1,19 +1,29 @@
 name: amitofo_chatting
 description: A new Flutter project.
-publish_to: 'none'
+publish_to: "none"
 version: 0.1.0
 
 environment:
-  sdk: '>=2.19.4 <3.0.0'
+  sdk: ">=2.19.4 <3.0.0"
 
 dependencies:
   flutter:
     sdk: flutter
   provider: ^6.0.5
-  sqflite:
-  path:
   intl:
   chat_bubbles:
+  cupertino_icons:
+  firebase_core:
+  firebase_auth: ^4.10.1
+  firebase_storage: ^11.2.8
+  firebase_messaging:
+  google_sign_in: ^6.1.5
+  cloud_firestore: ^4.9.3
+  cached_network_image: ^3.3.0
+  flutter_local_notifications:
+  fluttertoast: ^8.2.2
+  image_picker: ^1.0.4
+  shared_preferences:
 
 dev_dependencies:
   flutter_test:
@@ -22,3 +32,6 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  
+  assets:
+    - images/

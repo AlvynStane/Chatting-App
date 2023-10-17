@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "420716583804",
+    "project_id": "amitofochat",
+    "storage_bucket": "amitofochat.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:420716583804:android:2dbdabd6eea0d89904a2f9",
+        "android_client_info": {
+          "package_name": "com.example.amitofo_chatting"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "420716583804-n4u48ijs8mlr9d7kpatoh9e8a63ujeb8.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD6346pafs0t-Yssntbi-uJsw6jo03_rcA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "420716583804-n4u48ijs8mlr9d7kpatoh9e8a63ujeb8.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
