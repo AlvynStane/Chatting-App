@@ -1,16 +1,14 @@
 import 'dart:async';
-import 'dart:io';
 
+import 'package:amitofo_chatting/Constant/color_constants.dart';
 import 'package:amitofo_chatting/Constant/firebase_constants.dart';
-import 'package:amitofo_chatting/Model/user_chat.dart';
+import 'package:amitofo_chatting/Model/model.dart';
 import 'package:amitofo_chatting/Pages/Login/login.dart';
 import 'package:amitofo_chatting/Pages/chatpage.dart';
-import 'package:amitofo_chatting/Provider/auth_provider.dart';
-import 'package:amitofo_chatting/Provider/home_provider.dart';
+import 'package:amitofo_chatting/Pages/profilepage.dart';
+import 'package:amitofo_chatting/Provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:provider/provider.dart';
 
@@ -22,9 +20,6 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  final FirebaseMessaging firebaseMessaging = FirebaseMessaging.instance;
-  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-      FlutterLocalNotificationsPlugin();
   final GoogleSignIn googleSignIn = GoogleSignIn();
   final ScrollController listScrollController = ScrollController();
   final StreamController<bool> btnClearController = StreamController<bool>();
@@ -37,6 +32,11 @@ class _HomePageState extends State<HomePage> {
   late final String currentUserId;
   late final AuthProvider authProvider = context.read<AuthProvider>();
   late final HomeProvider homeProvider = context.read<HomeProvider>();
+
+  final List<PopupChoice> choices = [
+    PopupChoice(title: 'Profile', icon: Icons.person_2),
+    PopupChoice(title: 'Log Out', icon: Icons.logout),
+  ];
 
   @override
   void initState() {
@@ -68,92 +68,12 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  Future<bool> onBackPress() {
-    openDialog();
-    return Future.value(false);
-  }
-
-  Future<void> openDialog() async {
-    switch (await showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return SimpleDialog(
-            clipBehavior: Clip.hardEdge,
-            shape:RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-            contentPadding: EdgeInsets.zero,
-            children: [
-              Container(
-                padding: const EdgeInsets.only(bottom: 10, top: 10),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      margin: const EdgeInsets.only(bottom: 10),
-                      child: const Icon(
-                        Icons.exit_to_app,
-                        size: 30,
-                        color: Colors.white,
-                      ),
-                    ),
-                    const Text(
-                      'Exit app',
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold),
-                    ),
-                    const Text(
-                      'Are you sure to exit app?',
-                      style: TextStyle(color: Colors.white70, fontSize: 14),
-                    ),
-                  ],
-                ),
-              ),
-              SimpleDialogOption(
-                onPressed: () {
-                  Navigator.pop(context, 0);
-                },
-                child: Row(
-                  children: [
-                    Container(
-                      margin: const EdgeInsets.only(right: 10),
-                      child: const Icon(
-                        Icons.cancel,
-                      ),
-                    ),
-                    const Text(
-                      'Cancel',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    )
-                  ],
-                ),
-              ),
-              SimpleDialogOption(
-                onPressed: () {
-                  Navigator.pop(context, 1);
-                },
-                child: Row(
-                  children: [
-                    Container(
-                      margin: const EdgeInsets.only(right: 10),
-                      child: const Icon(
-                        Icons.check_circle,
-                      ),
-                    ),
-                    const Text(
-                      'Yes',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    )
-                  ],
-                ),
-              ),
-            ],
-          );
-        })) {
-      case 0:
-        break;
-      case 1:
-        exit(0);
+  void onSelectedChoices(PopupChoice choice) {
+    if (choice.title == 'Profile') {
+      Navigator.push(
+          context, MaterialPageRoute(builder: ((context) => const ProfilePage())));
+    } else {
+      handleSignOut();
     }
   }
 
@@ -170,54 +90,45 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Home Page'),
-        centerTitle: true,
-        actions: [
-          IconButton(
-            onPressed: handleSignOut,
-            icon: const Icon(Icons.logout),
-          ),
-        ],
+        actions: [buildAction()],
       ),
       body: SafeArea(
-        child: WillPopScope(
-          onWillPop: onBackPress,
-          child: Stack(
-            children: [
-              Column(
-                children: [
-                  Expanded(
-                    child: StreamBuilder(
-                      stream: homeProvider.getStreamFireStore(
-                          FirestoreConstants.pathUserCollection,
-                          _limit,
-                          _textSearch),
-                      builder: (BuildContext context, AsyncSnapshot snapshot) {
-                        if (snapshot.hasData) {
-                          if ((snapshot.data?.docs.length ?? 0) > 0) {
-                            return ListView.builder(
-                              padding: const EdgeInsets.all(10),
-                              itemBuilder: (context, index) => buildItem(
-                                  context, snapshot.data?.docs[index]),
-                              itemCount: snapshot.data?.docs.length,
-                              controller: listScrollController,
-                            );
-                          } else {
-                            return const Center(
-                              child: Text("No users"),
-                            );
-                          }
+        child: Stack(
+          children: [
+            Column(
+              children: [
+                Expanded(
+                  child: StreamBuilder(
+                    stream: homeProvider.getStreamFireStore(
+                        FirestoreConstants.pathUserCollection,
+                        _limit,
+                        _textSearch),
+                    builder: (BuildContext context, AsyncSnapshot snapshot) {
+                      if (snapshot.hasData) {
+                        if ((snapshot.data?.docs.length ?? 0) > 0) {
+                          return ListView.builder(
+                            padding: const EdgeInsets.all(10),
+                            itemBuilder: (context, index) => buildItem(
+                                context, snapshot.data?.docs[index]),
+                            itemCount: snapshot.data?.docs.length,
+                            controller: listScrollController,
+                          );
                         } else {
                           return const Center(
-                            child: CircularProgressIndicator(),
+                            child: Text("No users"),
                           );
                         }
-                      },
-                    ),
+                      } else {
+                        return const Center(
+                          child: CircularProgressIndicator(),
+                        );
+                      }
+                    },
                   ),
-                ],
-              ),
-            ],
-          ),
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );
@@ -326,5 +237,25 @@ class _HomePageState extends State<HomePage> {
     } else {
       return const SizedBox.shrink();
     }
+  }
+
+  Widget buildAction() {
+    return PopupMenuButton(
+        onSelected: onSelectedChoices,
+        itemBuilder: (context) {
+          return choices.map((choice) {
+            return PopupMenuItem(
+              value: choice,
+              child: Row(
+                children: [
+                  Icon(choice.icon, color: ColorConstants.primaryColor),
+                  Text(choice.title,
+                      style:
+                          const TextStyle(color: ColorConstants.primaryColor)),
+                ],
+              ),
+            );
+          }).toList();
+        });
   }
 }

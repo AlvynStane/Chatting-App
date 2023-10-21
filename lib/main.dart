@@ -1,5 +1,5 @@
 import 'package:amitofo_chatting/Constant/color_constants.dart';
-import 'package:amitofo_chatting/Pages/Login/login.dart';
+import 'package:amitofo_chatting/Pages/Login/splash_page.dart';
 import 'package:amitofo_chatting/Provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -56,6 +56,6 @@ class MainApp extends StatelessWidget {
           primaryColor: ColorConstants.primaryColor,
           primarySwatch: MaterialColor(0xfff49f1c, ColorConstants.swatchColor),
         ),
-        home: const Login());
+        home: const LoadingScreen());
   }
 }
