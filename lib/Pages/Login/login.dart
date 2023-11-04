@@ -1,6 +1,6 @@
 import 'package:amitofo_chatting/Pages/Login/register.dart';
 import 'package:amitofo_chatting/Pages/home.dart';
-import 'package:amitofo_chatting/Provider/auth_provider.dart';
+import 'package:amitofo_chatting/Provider/provider.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -17,11 +17,6 @@ class _LoginState extends State<Login> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _obscureText = true;
-
-  void showErrorSnackBar(String message) {
-    final snackBar = SnackBar(content: Text(message));
-    ScaffoldMessenger.of(context).showSnackBar(snackBar);
-  }
 
   @override
   void dispose() {
@@ -122,7 +117,10 @@ class _LoginState extends State<Login> {
                     width: 90,
                     child: ElevatedButton(
                       onPressed: () async {
-                        authProvider.handleSignIn().then((isSuccess) {
+                        authProvider
+                            .signInWithEmailAndPassword(
+                                _emailController.text, _passwordController.text)
+                            .then((isSuccess) {
                           if (isSuccess) {
                             Navigator.pushReplacement(
                               context,
@@ -171,6 +169,7 @@ class _LoginState extends State<Login> {
                     const Text("Not registered? "),
                     TextButton(
                       onPressed: () {
+                        authProvider.resetStatus();
                         Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(

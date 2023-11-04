@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:amitofo_chatting/Constant/color_constants.dart';
 import 'package:amitofo_chatting/Pages/Login/login.dart';
 import 'package:amitofo_chatting/Pages/home.dart';
@@ -16,26 +18,44 @@ class _LoadingScreenState extends State<LoadingScreen> {
   @override
   void initState() {
     super.initState();
-    Future.delayed(Duration(seconds: 1), () {
-      checkSignedIn();
+    Future.delayed(const Duration(seconds: 1), () {
+      checkSignedIn(context.read<AuthProvider>());
     });
   }
 
-  void checkSignedIn() async {
-    AuthProvider authProvider = context.read<AuthProvider>();
-    bool isLoggedIn = await authProvider.isLoggedIn();
-    if (isLoggedIn) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => HomePage()),
-      );
-      return;
-    }
+  void checkSignedIn(AuthProvider authProvider) async {
+  bool isLoggedIn = await authProvider.isLoggedIn();
+  if (isLoggedIn) {
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (context) => Login()),
+      MaterialPageRoute(builder: (BuildContext context) => const HomePage()),
     );
+  } else {
+    int maxRetryCount = 3;
+    int retryCount = 0;
+    const retryDelay = Duration(seconds: 1);
+
+    Timer.periodic(retryDelay, (timer) async {
+      isLoggedIn = await authProvider.isLoggedIn();
+      if (isLoggedIn || retryCount >= maxRetryCount) {
+        timer.cancel();
+        if (isLoggedIn) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (BuildContext context) => const HomePage()),
+          );
+        } else {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (BuildContext context) => const Login()),
+          );
+        }
+      }
+      retryCount++;
+    });
   }
+}
+
 
   @override
   Widget build(BuildContext context) {

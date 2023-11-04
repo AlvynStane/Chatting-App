@@ -39,6 +39,13 @@ void main() async {
             firebaseStorage: firebaseStorage,
           ),
         ),
+        Provider<ProfileProvider>(
+          create: (_) => ProfileProvider(
+            prefs: prefs,
+            firebaseFirestore: firebaseFirestore,
+            firebaseStorage: firebaseStorage,
+          ),
+        ),
       ],
       child: const MainApp(),
     ),
@@ -51,11 +58,12 @@ class MainApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-        debugShowCheckedModeBanner: false,
-        theme: ThemeData(
-          primaryColor: ColorConstants.primaryColor,
-          primarySwatch: MaterialColor(0xfff49f1c, ColorConstants.swatchColor),
-        ),
-        home: const LoadingScreen());
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        primaryColor: ColorConstants.primaryColor,
+        primarySwatch: MaterialColor(0xfff49f1c, ColorConstants.swatchColor),
+      ),
+      home: const LoadingScreen(),
+    );
   }
 }

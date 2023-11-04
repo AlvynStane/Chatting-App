@@ -1,5 +1,8 @@
 import 'package:amitofo_chatting/Pages/Login/login.dart';
+import 'package:amitofo_chatting/Provider/provider.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:provider/provider.dart';
 
 class Register extends StatefulWidget {
   const Register({super.key});
@@ -10,7 +13,6 @@ class Register extends StatefulWidget {
 
 class _RegisterState extends State<Register> {
   final _unameController = TextEditingController();
-  final _phoneController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _obscureText = true;
@@ -24,6 +26,20 @@ class _RegisterState extends State<Register> {
 
   @override
   Widget build(BuildContext context) {
+    AuthProvider authProvider = Provider.of<AuthProvider>(context);
+    switch (authProvider.status) {
+      case Status.authenticateError:
+        Fluttertoast.showToast(msg: "Register fail");
+        break;
+      case Status.authenticateCanceled:
+        Fluttertoast.showToast(msg: "Register canceled");
+        break;
+      case Status.authenticated:
+        Fluttertoast.showToast(msg: "Register success");
+        break;
+      default:
+        break;
+    }
     return Scaffold(
       appBar: AppBar(),
       body: Center(
@@ -60,28 +76,7 @@ class _RegisterState extends State<Register> {
                 TextFormField(
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter email/username';
-                    }
-                    return null;
-                  },
-                  keyboardType: TextInputType.number,
-                  controller: _phoneController,
-                  decoration: InputDecoration(
-                      hintText: 'Enter Phone Number Here',
-                      border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(11),
-                          borderSide: const BorderSide()),
-                      prefixIcon: const Icon(
-                        Icons.phone,
-                      )),
-                ),
-                Container(
-                  height: 15,
-                ),
-                TextFormField(
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter email/username';
+                      return 'Please enter username';
                     }
                     return null;
                   },
@@ -102,7 +97,7 @@ class _RegisterState extends State<Register> {
                 TextFormField(
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter email/username';
+                      return 'Please enter email';
                     }
                     return null;
                   },
@@ -135,7 +130,24 @@ class _RegisterState extends State<Register> {
                   height: 15,
                 ),
                 ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    authProvider
+                        .registerWithEmailAndPassword(_emailController.text,
+                            _passwordController.text, _unameController.text)
+                        .then((isSuccess) {
+                      if (isSuccess) {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const Login(),
+                          ),
+                        );
+                      }
+                    }).catchError((error, stackTrace) {
+                      Fluttertoast.showToast(msg: error.toString());
+                      authProvider.handleException();
+                    });
+                  },
                   child: const Text('Create'),
                 ),
                 Container(
@@ -147,10 +159,13 @@ class _RegisterState extends State<Register> {
                     const Text("Already have an account? "),
                     TextButton(
                         onPressed: () {
+                          authProvider.resetStatus();
                           Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => const Login()));
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const Login(),
+                            ),
+                          );
                         },
                         style: ButtonStyle(
                             overlayColor: MaterialStateProperty.all<Color>(

@@ -1,9 +1,12 @@
+import 'dart:convert';
+
 import 'package:amitofo_chatting/Constant/firebase_constants.dart';
 import 'package:amitofo_chatting/Model/user_chat.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 enum Status {
@@ -36,12 +39,30 @@ class AuthProvider extends ChangeNotifier {
     return prefs.getString(FirestoreConstants.id);
   }
 
+  void resetStatus() {
+    _status = Status.uninitialized;
+    notifyListeners();
+  }
+
   Future<bool> isLoggedIn() async {
-    bool isLoggedIn = await googleSignIn.isSignedIn();
-    if (isLoggedIn && prefs.getString(FirestoreConstants.id)?.isNotEmpty == true) {
-      return true;
+    final currentUser = firebaseAuth.currentUser;
+    if (currentUser != null) {
+      bool isGoogleSignedIn = await googleSignIn.isSignedIn();
+      bool hasUserId =
+          prefs.getString(FirestoreConstants.id)?.isNotEmpty == true;
+      return isGoogleSignedIn || hasUserId;
+    }
+    return false;
+  }
+
+  Future<String> fetchRandomDogImage() async {
+    final response =
+        await http.get(Uri.parse('https://dog.ceo/api/breeds/image/random'));
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body)['message'];
     } else {
-      return false;
+      throw Exception('Failed to load random dog image');
     }
   }
 
@@ -57,7 +78,8 @@ class AuthProvider extends ChangeNotifier {
         idToken: googleAuth.idToken,
       );
 
-      User? firebaseUser = (await firebaseAuth.signInWithCredential(credential)).user;
+      User? firebaseUser =
+          (await firebaseAuth.signInWithCredential(credential)).user;
 
       if (firebaseUser != null) {
         final QuerySnapshot result = await firebaseFirestore
@@ -65,8 +87,11 @@ class AuthProvider extends ChangeNotifier {
             .where(FirestoreConstants.id, isEqualTo: firebaseUser.uid)
             .get();
         final List<DocumentSnapshot> documents = result.docs;
-        if (documents.length == 0) {
-          firebaseFirestore.collection(FirestoreConstants.pathUserCollection).doc(firebaseUser.uid).set({
+        if (documents.isEmpty) {
+          firebaseFirestore
+              .collection(FirestoreConstants.pathUserCollection)
+              .doc(firebaseUser.uid)
+              .set({
             FirestoreConstants.nickname: firebaseUser.displayName,
             FirestoreConstants.photoUrl: firebaseUser.photoURL,
             FirestoreConstants.id: firebaseUser.uid,
@@ -75,9 +100,12 @@ class AuthProvider extends ChangeNotifier {
           });
 
           User? currentUser = firebaseUser;
+          String profilePicture = await fetchRandomDogImage();
           await prefs.setString(FirestoreConstants.id, currentUser.uid);
-          await prefs.setString(FirestoreConstants.nickname, currentUser.displayName ?? "");
-          await prefs.setString(FirestoreConstants.photoUrl, currentUser.photoURL ?? "");
+          await prefs.setString(
+              FirestoreConstants.nickname, currentUser.displayName ?? "");
+          await prefs.setString(FirestoreConstants.photoUrl,
+              currentUser.photoURL ?? profilePicture);
         } else {
           DocumentSnapshot documentSnapshot = documents[0];
           UserChat userChat = UserChat.fromDocument(documentSnapshot);
@@ -101,6 +129,101 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
+  Future<bool> registerWithEmailAndPassword(
+      String email, String password, String nickname) async {
+    try {
+      _status = Status.authenticating;
+      notifyListeners();
+
+      UserCredential userCredential =
+          await firebaseAuth.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+
+      User? firebaseUser = userCredential.user;
+
+      if (firebaseUser != null) {
+        await firebaseUser.updateDisplayName(nickname);
+        final QuerySnapshot result = await firebaseFirestore
+            .collection(FirestoreConstants.pathUserCollection)
+            .where(FirestoreConstants.id, isEqualTo: firebaseUser.uid)
+            .get();
+        final List<DocumentSnapshot> documents = result.docs;
+        if (documents.isEmpty) {
+          String profilePicture = await fetchRandomDogImage();
+          firebaseFirestore
+              .collection(FirestoreConstants.pathUserCollection)
+              .doc(firebaseUser.uid)
+              .set({
+            FirestoreConstants.nickname: nickname,
+            FirestoreConstants.photoUrl: profilePicture,
+            FirestoreConstants.id: firebaseUser.uid,
+            'createdAt': DateTime.now().millisecondsSinceEpoch.toString(),
+            FirestoreConstants.chattingWith: null
+          });
+          User? currentUser = firebaseUser;
+          await prefs.setString(FirestoreConstants.id, currentUser.uid);
+          await prefs.setString(
+              FirestoreConstants.nickname, currentUser.displayName ?? "");
+          await prefs.setString(FirestoreConstants.photoUrl,
+              currentUser.photoURL ?? "");
+        }
+        _status = Status.authenticated;
+        notifyListeners();
+        return true;
+      } else {
+        _status = Status.authenticateError;
+        notifyListeners();
+        return false;
+      }
+    } catch (e) {
+      handleException();
+      return false;
+    }
+  }
+
+  Future<bool> signInWithEmailAndPassword(String email, String password) async {
+    try {
+      _status = Status.authenticating;
+      notifyListeners();
+
+      UserCredential userCredential =
+          await firebaseAuth.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+
+      User? firebaseUser = userCredential.user;
+
+      if (firebaseUser != null) {
+        final QuerySnapshot result = await firebaseFirestore
+            .collection(FirestoreConstants.pathUserCollection)
+            .where(FirestoreConstants.id, isEqualTo: firebaseUser.uid)
+            .get();
+        final List<DocumentSnapshot> documents = result.docs;
+
+        DocumentSnapshot documentSnapshot = documents[0];
+        UserChat userChat = UserChat.fromDocument(documentSnapshot);
+        await prefs.setString(FirestoreConstants.id, userChat.id);
+        await prefs.setString(FirestoreConstants.nickname, userChat.nickname);
+        await prefs.setString(FirestoreConstants.photoUrl, userChat.photoUrl);
+        await prefs.setString(FirestoreConstants.aboutMe, userChat.aboutMe);
+
+        _status = Status.authenticated;
+        notifyListeners();
+        return true;
+      } else {
+        _status = Status.authenticateError;
+        notifyListeners();
+        return false;
+      }
+    } catch (e) {
+      handleException();
+      return false;
+    }
+  }
+
   void handleException() {
     _status = Status.authenticateException;
     notifyListeners();
@@ -108,8 +231,12 @@ class AuthProvider extends ChangeNotifier {
 
   Future<void> handleSignOut() async {
     _status = Status.uninitialized;
+    User? user = firebaseAuth.currentUser;
+    if (user!.providerData
+        .any((userInfo) => userInfo.providerId == 'google.com')) {
+      await googleSignIn.disconnect();
+      await googleSignIn.signOut();
+    }
     await firebaseAuth.signOut();
-    await googleSignIn.disconnect();
-    await googleSignIn.signOut();
   }
 }
