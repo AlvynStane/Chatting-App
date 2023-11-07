@@ -94,7 +94,7 @@ Future uploadFile() async {
         setState(() {
           isLoading = false;
         });
-        Fluttertoast.showToast(msg: err.toString());
+        Fluttertoast.showToast(msg: err.toString());  
       });
     } on FirebaseException catch (e) {
       setState(() {

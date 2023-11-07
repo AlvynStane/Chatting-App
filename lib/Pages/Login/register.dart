@@ -1,3 +1,4 @@
+import 'package:amitofo_chatting/Constant/constants.dart';
 import 'package:amitofo_chatting/Pages/Login/login.dart';
 import 'package:amitofo_chatting/Provider/provider.dart';
 import 'package:flutter/material.dart';
@@ -19,9 +20,10 @@ class _RegisterState extends State<Register> {
   late bool create;
   final _formKey = GlobalKey<FormState>();
 
-  void showErrorSnackBar(String message) {
-    final snackBar = SnackBar(content: Text(message));
-    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  bool isValidEmail(String email) {
+    const emailPattern = r'^[\w-]+(\.[\w-]+)*@[\w-]+(\.[\w-]+)+$';
+    final regExp = RegExp(emailPattern);
+    return regExp.hasMatch(email);
   }
 
   @override
@@ -36,6 +38,9 @@ class _RegisterState extends State<Register> {
         break;
       case Status.authenticated:
         Fluttertoast.showToast(msg: "Register success");
+        break;
+      case Status.authenticateRejected:
+        Fluttertoast.showToast(msg: "Email is already registered");
         break;
       default:
         break;
@@ -55,7 +60,7 @@ class _RegisterState extends State<Register> {
                 TextFormField(
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter email/username';
+                      return 'Please enter username';
                     }
                     return null;
                   },
@@ -76,7 +81,10 @@ class _RegisterState extends State<Register> {
                 TextFormField(
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter username';
+                      return 'Please enter email';
+                    }
+                    if (!isValidEmail(value)) {
+                      return 'Email format is incorrect';
                     }
                     return null;
                   },
@@ -97,7 +105,10 @@ class _RegisterState extends State<Register> {
                 TextFormField(
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter email';
+                      return 'Please enter password';
+                    }
+                    if (value.length <= 3) {
+                      return 'Password should be at least 6 characters';
                     }
                     return null;
                   },
@@ -130,23 +141,25 @@ class _RegisterState extends State<Register> {
                   height: 15,
                 ),
                 ElevatedButton(
-                  onPressed: () {
-                    authProvider
-                        .registerWithEmailAndPassword(_emailController.text,
-                            _passwordController.text, _unameController.text)
-                        .then((isSuccess) {
-                      if (isSuccess) {
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const Login(),
-                          ),
-                        );
-                      }
-                    }).catchError((error, stackTrace) {
-                      Fluttertoast.showToast(msg: error.toString());
-                      authProvider.handleException();
-                    });
+                  onPressed: () async {
+                    if (_formKey.currentState!.validate()) {
+                      authProvider
+                          .registerWithEmailAndPassword(_emailController.text,
+                              _passwordController.text, _unameController.text)
+                          .then((isSuccess) {
+                        if (isSuccess) {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const Login(),
+                            ),
+                          );
+                        }
+                      }).catchError((error, stackTrace) {
+                        Fluttertoast.showToast(msg: error.toString());
+                        authProvider.handleException();
+                      });
+                    }
                   },
                   child: const Text('Create'),
                 ),
@@ -172,7 +185,7 @@ class _RegisterState extends State<Register> {
                                 Colors.transparent)),
                         child: const Text(
                           'Sign in here',
-                          style: TextStyle(color: Colors.blue),
+                          style: TextStyle(color: ColorConstants.primaryColor),
                         )),
                   ],
                 ),

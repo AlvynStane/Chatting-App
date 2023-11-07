@@ -1,7 +1,6 @@
 import 'dart:async';
 
-import 'package:amitofo_chatting/Constant/color_constants.dart';
-import 'package:amitofo_chatting/Constant/firebase_constants.dart';
+import 'package:amitofo_chatting/Constant/constants.dart';
 import 'package:amitofo_chatting/Model/model.dart';
 import 'package:amitofo_chatting/Pages/Login/login.dart';
 import 'package:amitofo_chatting/Pages/chatpage.dart';
@@ -70,8 +69,8 @@ class _HomePageState extends State<HomePage> {
 
   void onSelectedChoices(PopupChoice choice) {
     if (choice.title == 'Profile') {
-      Navigator.push(
-          context, MaterialPageRoute(builder: ((context) => const ProfilePage())));
+      Navigator.push(context,
+          MaterialPageRoute(builder: ((context) => const ProfilePage())));
     } else {
       handleSignOut();
     }
@@ -89,7 +88,10 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Home Page'),
+        title: const Text(
+          'Home Page',
+          style: TextStyle(color: ColorConstants.primaryColor),
+        ),
         actions: [buildAction()],
       ),
       body: SafeArea(
@@ -108,14 +110,18 @@ class _HomePageState extends State<HomePage> {
                         if ((snapshot.data?.docs.length ?? 0) > 0) {
                           return ListView.builder(
                             padding: const EdgeInsets.all(10),
-                            itemBuilder: (context, index) => buildItem(
-                                context, snapshot.data?.docs[index]),
+                            itemBuilder: (context, index) =>
+                                buildItem(context, snapshot.data?.docs[index]),
                             itemCount: snapshot.data?.docs.length,
                             controller: listScrollController,
                           );
                         } else {
                           return const Center(
-                            child: Text("No users"),
+                            child: Text(
+                              "No users",
+                              style:
+                                  TextStyle(color: ColorConstants.primaryColor),
+                            ),
                           );
                         }
                       } else {
@@ -142,6 +148,10 @@ class _HomePageState extends State<HomePage> {
       } else {
         return Container(
           margin: const EdgeInsets.only(bottom: 10, left: 5, right: 5),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(10),
+            color: ColorConstants.greyColor2,
+          ),
           child: TextButton(
             onPressed: () {
               Navigator.push(
@@ -215,6 +225,8 @@ class _HomePageState extends State<HomePage> {
                           child: Text(
                             'Nickname: ${userChat.nickname}',
                             maxLines: 1,
+                            style:
+                                TextStyle(color: ColorConstants.primaryColor),
                           ),
                         ),
                         Container(
@@ -223,6 +235,8 @@ class _HomePageState extends State<HomePage> {
                           child: Text(
                             'About me: ${userChat.aboutMe}',
                             maxLines: 1,
+                            style:
+                                TextStyle(color: ColorConstants.primaryColor),
                           ),
                         )
                       ],
@@ -250,8 +264,7 @@ class _HomePageState extends State<HomePage> {
                 children: [
                   Icon(choice.icon, color: ColorConstants.primaryColor),
                   Text(choice.title,
-                      style:
-                          const TextStyle(color: ColorConstants.primaryColor)),
+                      style: TextStyle(color: ColorConstants.primaryColor)),
                 ],
               ),
             );

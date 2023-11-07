@@ -1,3 +1,4 @@
+import 'package:amitofo_chatting/Constant/color_constants.dart';
 import 'package:amitofo_chatting/Pages/Login/register.dart';
 import 'package:amitofo_chatting/Pages/home.dart';
 import 'package:amitofo_chatting/Provider/provider.dart';
@@ -17,6 +18,12 @@ class _LoginState extends State<Login> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _obscureText = true;
+
+  bool isValidEmail(String email) {
+    const emailPattern = r'^[\w-]+(\.[\w-]+)*@[\w-]+(\.[\w-]+)+$';
+    final regExp = RegExp(emailPattern);
+    return regExp.hasMatch(email);
+  }
 
   @override
   void dispose() {
@@ -62,6 +69,9 @@ class _LoginState extends State<Login> {
                     if (value == null || value.isEmpty) {
                       return 'Please enter email/username';
                     }
+                    if (!isValidEmail(value)) {
+                      return 'Email format is incorrect';
+                    }
                     return null;
                   },
                   decoration: InputDecoration(
@@ -83,6 +93,9 @@ class _LoginState extends State<Login> {
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Please enter password';
+                    }
+                    if (value.length <= 3) {
+                      return 'Password should be at least 6 characters';
                     }
                     return null;
                   },
@@ -117,22 +130,24 @@ class _LoginState extends State<Login> {
                     width: 90,
                     child: ElevatedButton(
                       onPressed: () async {
-                        authProvider
-                            .signInWithEmailAndPassword(
-                                _emailController.text, _passwordController.text)
-                            .then((isSuccess) {
-                          if (isSuccess) {
-                            Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const HomePage(),
-                              ),
-                            );
-                          }
-                        }).catchError((error, stackTrace) {
-                          Fluttertoast.showToast(msg: error.toString());
-                          authProvider.handleException();
-                        });
+                        if (_formKey.currentState!.validate()) {
+                          authProvider
+                              .signInWithEmailAndPassword(_emailController.text,
+                                  _passwordController.text)
+                              .then((isSuccess) {
+                            if (isSuccess) {
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const HomePage(),
+                                ),
+                              );
+                            }
+                          }).catchError((error, stackTrace) {
+                            Fluttertoast.showToast(msg: error.toString());
+                            authProvider.handleException();
+                          });
+                        }
                       },
                       child: const Text('SIGN IN'),
                     ),
@@ -160,7 +175,7 @@ class _LoginState extends State<Login> {
                   ),
                   child: const Text(
                     'Sign in with Google',
-                    style: TextStyle(color: Colors.green),
+                    style: TextStyle(color: ColorConstants.primaryColor),
                   ),
                 ),
                 Row(
@@ -183,7 +198,7 @@ class _LoginState extends State<Login> {
                       ),
                       child: const Text(
                         'Create an account',
-                        style: TextStyle(color: Colors.green),
+                        style: TextStyle(color: ColorConstants.primaryColor),
                       ),
                     ),
                   ],

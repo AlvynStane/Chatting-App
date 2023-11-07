@@ -1,9 +1,9 @@
 import 'dart:io';
-import 'package:amitofo_chatting/Constant/firebase_constants.dart';
-import 'package:amitofo_chatting/Model/message_chat.dart';
+import 'package:amitofo_chatting/Constant/constants.dart';
+import 'package:amitofo_chatting/Model/model.dart';
 import 'package:amitofo_chatting/Pages/Login/login.dart';
-import 'package:amitofo_chatting/Provider/auth_provider.dart';
-import 'package:amitofo_chatting/Provider/chat_provider.dart';
+import 'package:amitofo_chatting/Provider/provider.dart';
+import 'package:chat_bubbles/chat_bubbles.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -98,57 +98,50 @@ class ChatPageState extends State<ChatPage> {
     if (document != null) {
       MessageChat messageChat = MessageChat.fromDocument(document);
       if (messageChat.idFrom == currentUserId) {
-        return Row(
-          mainAxisAlignment: MainAxisAlignment.end,
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            Container(
-              padding: const EdgeInsets.fromLTRB(15, 10, 15, 10),
-              width: 200,
-              decoration: BoxDecoration(borderRadius: BorderRadius.circular(8)),
-              margin: EdgeInsets.only(
-                  bottom: isLastMessageRight(index) ? 20 : 10, right: 10),
-              child: Text(
-                messageChat.content,
-              ),
-            )
+            BubbleNormal(
+              text: messageChat.content,
+              isSender: true,
+              color: ColorConstants.greyColor2,
+              tail: true,
+            ),
+            isSameTime(index)
+                ? Container(
+                    margin: const EdgeInsets.only(left: 20, top: 5, bottom: 5),
+                    child: Text(
+                      DateFormat('dd MMM kk:mm')
+                          .format(DateTime.parse(messageChat.timestamp)),
+                      style: const TextStyle(
+                          fontSize: 10, fontStyle: FontStyle.italic),
+                    ),
+                  )
+                : const SizedBox.shrink()
           ],
         );
       } else {
-        return Container(
-          margin: const EdgeInsets.only(bottom: 10),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.fromLTRB(15, 10, 15, 10),
-                    width: 200,
-                    decoration:
-                        BoxDecoration(borderRadius: BorderRadius.circular(8)),
-                    margin: const EdgeInsets.only(left: 10),
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            BubbleNormal(
+              text: messageChat.content,
+              isSender: false,
+              color: ColorConstants.greyColor,
+              tail: true,
+            ),
+            isSameTime(index)
+                ? Container(
+                    margin: const EdgeInsets.only(left: 20, top: 5, bottom: 5),
                     child: Text(
-                      messageChat.content,
-                      style: const TextStyle(color: Colors.white),
+                      DateFormat('dd MMM kk:mm')
+                          .format(DateTime.parse(messageChat.timestamp)),
+                      style: const TextStyle(
+                          fontSize: 10, fontStyle: FontStyle.italic),
                     ),
                   )
-                ],
-              ),
-              isLastMessageLeft(index)
-                  ? Container(
-                      margin:
-                          const EdgeInsets.only(left: 50, top: 5, bottom: 5),
-                      child: Text(
-                        DateFormat('dd MMM kk:mm').format(
-                            DateTime.fromMillisecondsSinceEpoch(
-                                int.parse(messageChat.timestamp))),
-                        style: const TextStyle(
-                            fontSize: 12, fontStyle: FontStyle.italic),
-                      ),
-                    )
-                  : const SizedBox.shrink()
-            ],
-          ),
+                : const SizedBox.shrink()
+          ],
         );
       }
     } else {
@@ -164,6 +157,17 @@ class ChatPageState extends State<ChatPage> {
           border: Border(top: BorderSide(width: 0.5)), color: Colors.white),
       child: Row(
         children: <Widget>[
+          Material(
+            color: Colors.white,
+            child: Container(
+              margin: const EdgeInsets.symmetric(horizontal: 1),
+              child: IconButton(
+                icon: const Icon(Icons.add_box),
+                color: ColorConstants.primaryColor,
+                onPressed: () {},
+              ),
+            ),
+          ),
           Flexible(
             child: TextField(
               onSubmitted: (value) {
@@ -184,6 +188,7 @@ class ChatPageState extends State<ChatPage> {
               margin: const EdgeInsets.symmetric(horizontal: 8),
               child: IconButton(
                 icon: const Icon(Icons.send),
+                color: ColorConstants.primaryColor,
                 onPressed: () =>
                     onSendMessage(textEditingController.text, TypeMessage.text),
               ),
@@ -217,21 +222,25 @@ class ChatPageState extends State<ChatPage> {
                   }
                 } else {
                   return const Center(
-                    child: CircularProgressIndicator(),
+                    child: CircularProgressIndicator(
+                      color: ColorConstants.themeColor,
+                    ),
                   );
                 }
               },
             )
           : const Center(
-              child: CircularProgressIndicator(),
+              child: CircularProgressIndicator(
+                color: ColorConstants.themeColor,
+              ),
             ),
     );
   }
 
-  bool isLastMessageLeft(int index) {
-    if ((index > 0 &&
-            listMessage[index - 1].get(FirestoreConstants.idFrom) ==
-                currentUserId) ||
+  bool isSameTime(int index) {
+    if (index > 0 &&
+            listMessage[index - 1].get(FirestoreConstants.timestamp) ==
+                listMessage[index].get(FirestoreConstants.timestamp) ||
         index == 0) {
       return true;
     } else {
@@ -239,18 +248,34 @@ class ChatPageState extends State<ChatPage> {
     }
   }
 
-  bool isLastMessageRight(int index) {
-    if ((index > 0 &&
-            listMessage[index - 1].get(FirestoreConstants.idFrom) !=
-                currentUserId) ||
-        index == 0) {
-      return true;
-    } else {
-      return false;
-    }
-  }
+  // bool isLastMessageLeft(int index) {
+  //   if ((index > 0 &&
+  //           listMessage[index - 1].get(FirestoreConstants.idFrom) ==
+  //               currentUserId) ||
+  //       index == 0) {
+  //     return true;
+  //   } else {
+  //     return false;
+  //   }
+  // }
+
+  // bool isLastMessageRight(int index) {
+  //   if ((index > 0 &&
+  //           listMessage[index - 1].get(FirestoreConstants.idFrom) !=
+  //               currentUserId) ||
+  //       index == 0) {
+  //     return true;
+  //   } else {
+  //     return false;
+  //   }
+  // }
 
   Future<bool> onBackPress() {
+    chatProvider.updateDataFirestore(
+      FirestoreConstants.pathUserCollection,
+      currentUserId,
+      {FirestoreConstants.chattingWith: null},
+    );
     Navigator.pop(context);
     return Future.value(false);
   }

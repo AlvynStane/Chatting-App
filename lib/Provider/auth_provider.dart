@@ -16,6 +16,7 @@ enum Status {
   authenticateError,
   authenticateException,
   authenticateCanceled,
+  authenticateRejected,
 }
 
 class AuthProvider extends ChangeNotifier {
@@ -54,7 +55,7 @@ class AuthProvider extends ChangeNotifier {
     }
     return false;
   }
-
+  
   Future<String> fetchRandomDogImage() async {
     final response =
         await http.get(Uri.parse('https://dog.ceo/api/breeds/image/random'));
@@ -135,6 +136,15 @@ class AuthProvider extends ChangeNotifier {
       _status = Status.authenticating;
       notifyListeners();
 
+      final signInMethods =
+          await firebaseAuth.fetchSignInMethodsForEmail(email);
+
+      if (signInMethods.isNotEmpty) {
+        _status = Status.authenticateRejected;
+        notifyListeners();
+        return false;
+      }
+
       UserCredential userCredential =
           await firebaseAuth.createUserWithEmailAndPassword(
         email: email,
@@ -166,8 +176,8 @@ class AuthProvider extends ChangeNotifier {
           await prefs.setString(FirestoreConstants.id, currentUser.uid);
           await prefs.setString(
               FirestoreConstants.nickname, currentUser.displayName ?? "");
-          await prefs.setString(FirestoreConstants.photoUrl,
-              currentUser.photoURL ?? "");
+          await prefs.setString(
+              FirestoreConstants.photoUrl, currentUser.photoURL ?? "");
         }
         _status = Status.authenticated;
         notifyListeners();
