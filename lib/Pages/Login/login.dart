@@ -1,4 +1,4 @@
-import 'package:amitofo_chatting/Constant/color_constants.dart';
+import 'package:amitofo_chatting/Constant/constants.dart';
 import 'package:amitofo_chatting/Pages/Login/register.dart';
 import 'package:amitofo_chatting/Pages/home.dart';
 import 'package:amitofo_chatting/Provider/provider.dart';
@@ -163,6 +163,10 @@ class _LoginState extends State<Login> {
                             builder: (context) => const HomePage(),
                           ),
                         );
+                      } else {
+                        setState(() {
+                          
+                        });
                       }
                     }).catchError((error, stackTrace) {
                       Fluttertoast.showToast(msg: error.toString());

@@ -1,4 +1,4 @@
-import 'package:amitofo_chatting/Constant/color_constants.dart';
+import 'package:amitofo_chatting/Constant/constants.dart';
 import 'package:amitofo_chatting/Pages/Login/splash_page.dart';
 import 'package:amitofo_chatting/Provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';

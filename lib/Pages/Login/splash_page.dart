@@ -1,6 +1,5 @@
 import 'dart:async';
-
-import 'package:amitofo_chatting/Constant/color_constants.dart';
+import 'package:amitofo_chatting/Constant/constants.dart';
 import 'package:amitofo_chatting/Pages/Login/login.dart';
 import 'package:amitofo_chatting/Pages/home.dart';
 import 'package:amitofo_chatting/Provider/provider.dart';
@@ -24,38 +23,39 @@ class _LoadingScreenState extends State<LoadingScreen> {
   }
 
   void checkSignedIn(AuthProvider authProvider) async {
-  bool isLoggedIn = await authProvider.isLoggedIn();
-  if (isLoggedIn) {
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (BuildContext context) => const HomePage()),
-    );
-  } else {
-    int maxRetryCount = 3;
-    int retryCount = 0;
-    const retryDelay = Duration(seconds: 1);
+    bool isLoggedIn = await authProvider.isLoggedIn();
+    if (isLoggedIn) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (BuildContext context) => const HomePage()),
+      );
+    } else {
+      int maxRetryCount = 3;
+      int retryCount = 0;
+      const retryDelay = Duration(seconds: 1);
 
-    Timer.periodic(retryDelay, (timer) async {
-      isLoggedIn = await authProvider.isLoggedIn();
-      if (isLoggedIn || retryCount >= maxRetryCount) {
-        timer.cancel();
-        if (isLoggedIn) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (BuildContext context) => const HomePage()),
-          );
-        } else {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (BuildContext context) => const Login()),
-          );
+      Timer.periodic(retryDelay, (timer) async {
+        isLoggedIn = await authProvider.isLoggedIn();
+        if (isLoggedIn || retryCount >= maxRetryCount) {
+          timer.cancel();
+          if (isLoggedIn) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                  builder: (BuildContext context) => const HomePage()),
+            );
+          } else {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                  builder: (BuildContext context) => const Login()),
+            );
+          }
         }
-      }
-      retryCount++;
-    });
+        retryCount++;
+      });
+    }
   }
-}
-
 
   @override
   Widget build(BuildContext context) {

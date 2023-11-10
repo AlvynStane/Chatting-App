@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:amitofo_chatting/Constant/constants.dart';
 import 'package:amitofo_chatting/Model/model.dart';
 import 'package:amitofo_chatting/Pages/Login/login.dart';
@@ -226,7 +225,7 @@ class _HomePageState extends State<HomePage> {
                             'Nickname: ${userChat.nickname}',
                             maxLines: 1,
                             style:
-                                TextStyle(color: ColorConstants.primaryColor),
+                                const TextStyle(color: ColorConstants.primaryColor),
                           ),
                         ),
                         Container(
@@ -236,7 +235,7 @@ class _HomePageState extends State<HomePage> {
                             'About me: ${userChat.aboutMe}',
                             maxLines: 1,
                             style:
-                                TextStyle(color: ColorConstants.primaryColor),
+                                const TextStyle(color: ColorConstants.primaryColor),
                           ),
                         )
                       ],
@@ -264,7 +263,7 @@ class _HomePageState extends State<HomePage> {
                 children: [
                   Icon(choice.icon, color: ColorConstants.primaryColor),
                   Text(choice.title,
-                      style: TextStyle(color: ColorConstants.primaryColor)),
+                      style: const TextStyle(color: ColorConstants.primaryColor)),
                 ],
               ),
             );

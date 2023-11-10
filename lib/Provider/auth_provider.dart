@@ -1,7 +1,6 @@
 import 'dart:convert';
-
-import 'package:amitofo_chatting/Constant/firebase_constants.dart';
-import 'package:amitofo_chatting/Model/user_chat.dart';
+import 'package:amitofo_chatting/Constant/constants.dart';
+import 'package:amitofo_chatting/Model/model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -55,7 +54,7 @@ class AuthProvider extends ChangeNotifier {
     }
     return false;
   }
-  
+
   Future<String> fetchRandomDogImage() async {
     final response =
         await http.get(Uri.parse('https://dog.ceo/api/breeds/image/random'));

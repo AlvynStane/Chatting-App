@@ -1,5 +1,5 @@
-import 'package:amitofo_chatting/Constant/firebase_constants.dart';
-import 'package:amitofo_chatting/Model/message_chat.dart';
+import 'package:amitofo_chatting/Constant/constants.dart';
+import 'package:amitofo_chatting/Model/model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
