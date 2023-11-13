@@ -36,7 +36,7 @@ class ChatPageState extends State<ChatPage> {
   final FocusNode focusNode = FocusNode();
 
   late final ChatProvider chatProvider = context.read<ChatProvider>();
-  late final AuthProvider authProvider = context.read<AuthProvider>();
+  late final AuthenProvider authProvider = context.read<AuthenProvider>();
 
   @override
   void initState() {

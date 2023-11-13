@@ -18,11 +18,11 @@ class _LoadingScreenState extends State<LoadingScreen> {
   void initState() {
     super.initState();
     Future.delayed(const Duration(seconds: 1), () {
-      checkSignedIn(context.read<AuthProvider>());
+      checkSignedIn(context.read<AuthenProvider>());
     });
   }
 
-  void checkSignedIn(AuthProvider authProvider) async {
+  void checkSignedIn(AuthenProvider authProvider) async {
     bool isLoggedIn = await authProvider.isLoggedIn();
     if (isLoggedIn) {
       Navigator.pushReplacement(

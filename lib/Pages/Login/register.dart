@@ -28,7 +28,7 @@ class _RegisterState extends State<Register> {
 
   @override
   Widget build(BuildContext context) {
-    AuthProvider authProvider = Provider.of<AuthProvider>(context);
+    AuthenProvider authProvider = Provider.of<AuthenProvider>(context);
     switch (authProvider.status) {
       case Status.authenticateError:
         Fluttertoast.showToast(msg: "Register fail");

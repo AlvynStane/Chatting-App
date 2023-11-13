@@ -28,7 +28,7 @@ class _HomePageState extends State<HomePage> {
   bool isLoading = false;
 
   late final String currentUserId;
-  late final AuthProvider authProvider = context.read<AuthProvider>();
+  late final AuthenProvider authProvider = context.read<AuthenProvider>();
   late final HomeProvider homeProvider = context.read<HomeProvider>();
 
   final List<PopupChoice> choices = [

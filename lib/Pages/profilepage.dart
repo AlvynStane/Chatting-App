@@ -164,7 +164,7 @@ class ProfilePageState extends State<ProfilePage> {
                     height: 300,
                     width: double.maxFinite,
                     child: GridView.builder(
-                      physics: AlwaysScrollableScrollPhysics(
+                      physics: const AlwaysScrollableScrollPhysics(
                         parent: ClampingScrollPhysics(
                           parent: RangeMaintainingScrollPhysics(),
                         ),

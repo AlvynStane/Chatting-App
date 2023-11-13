@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class Login extends StatefulWidget {
-  const Login({Key? key}) : super(key: key);
+  const Login({super.key});
 
   @override
   State<Login> createState() => _LoginState();
@@ -34,7 +34,7 @@ class _LoginState extends State<Login> {
 
   @override
   Widget build(BuildContext context) {
-    AuthProvider authProvider = Provider.of<AuthProvider>(context);
+    AuthenProvider authProvider = Provider.of<AuthenProvider>(context);
     switch (authProvider.status) {
       case Status.authenticateError:
         Fluttertoast.showToast(msg: "Sign in fail");

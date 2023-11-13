@@ -18,7 +18,7 @@ enum Status {
   authenticateRejected,
 }
 
-class AuthProvider extends ChangeNotifier {
+class AuthenProvider extends ChangeNotifier {
   final GoogleSignIn googleSignIn;
   final FirebaseAuth firebaseAuth;
   final FirebaseFirestore firebaseFirestore;
@@ -28,7 +28,7 @@ class AuthProvider extends ChangeNotifier {
 
   Status get status => _status;
 
-  AuthProvider({
+  AuthenProvider({
     required this.firebaseAuth,
     required this.googleSignIn,
     required this.prefs,
