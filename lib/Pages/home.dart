@@ -8,6 +8,7 @@ import 'package:amitofo_chatting/Provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:localization/localization.dart';
 import 'package:provider/provider.dart';
 
 class HomePage extends StatefulWidget {
@@ -32,8 +33,8 @@ class _HomePageState extends State<HomePage> {
   late final HomeProvider homeProvider = context.read<HomeProvider>();
 
   final List<PopupChoice> choices = [
-    PopupChoice(title: 'Profile', icon: Icons.person_2),
-    PopupChoice(title: 'Log Out', icon: Icons.logout),
+    PopupChoice(title: 'Profile'.i18n(), icon: Icons.person_2),
+    PopupChoice(title: 'Logout'.i18n(), icon: Icons.logout),
   ];
 
   @override
@@ -67,7 +68,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   void onSelectedChoices(PopupChoice choice) {
-    if (choice.title == 'Profile') {
+    if (choice.title == 'Profile'.i18n()) {
       Navigator.push(context,
           MaterialPageRoute(builder: ((context) => const ProfilePage())));
     } else {
@@ -87,8 +88,8 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Home Page',
+        title: Text(
+          'Homepage'.i18n(),
           style: TextStyle(color: ColorConstants.primaryColor),
         ),
         actions: [buildAction()],
@@ -115,11 +116,11 @@ class _HomePageState extends State<HomePage> {
                             controller: listScrollController,
                           );
                         } else {
-                          return const Center(
+                          return Center(
                             child: Text(
-                              "No users",
-                              style:
-                                  TextStyle(color: ColorConstants.primaryColor),
+                              "No-user".i18n(),
+                              style: const TextStyle(
+                                  color: ColorConstants.primaryColor),
                             ),
                           );
                         }
@@ -224,18 +225,18 @@ class _HomePageState extends State<HomePage> {
                           child: Text(
                             'Nickname: ${userChat.nickname}',
                             maxLines: 1,
-                            style:
-                                const TextStyle(color: ColorConstants.primaryColor),
+                            style: const TextStyle(
+                                color: ColorConstants.primaryColor),
                           ),
                         ),
                         Container(
                           alignment: Alignment.centerLeft,
                           margin: const EdgeInsets.fromLTRB(10, 0, 0, 0),
                           child: Text(
-                            'About me: ${userChat.aboutMe}',
+                            '${'About-me'.i18n()}: ${userChat.aboutMe}',
                             maxLines: 1,
-                            style:
-                                const TextStyle(color: ColorConstants.primaryColor),
+                            style: const TextStyle(
+                                color: ColorConstants.primaryColor),
                           ),
                         )
                       ],
@@ -263,7 +264,8 @@ class _HomePageState extends State<HomePage> {
                 children: [
                   Icon(choice.icon, color: ColorConstants.primaryColor),
                   Text(choice.title,
-                      style: const TextStyle(color: ColorConstants.primaryColor)),
+                      style:
+                          const TextStyle(color: ColorConstants.primaryColor)),
                 ],
               ),
             );

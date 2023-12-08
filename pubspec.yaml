@@ -25,7 +25,13 @@ dependencies:
   image_picker: 
   shared_preferences:
   http:
+  permission_handler:
+  camera:
   path_provider: ^2.1.1
+  flutter_localizations:
+    sdk: flutter
+    version: ^0.0.0
+  localization:
 
 dev_dependencies:
   flutter_test:
@@ -37,3 +43,4 @@ flutter:
   
   assets:
     - images/
+    - lib/i18n/

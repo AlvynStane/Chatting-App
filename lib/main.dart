@@ -6,7 +6,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:localization/localization.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -57,7 +59,24 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    LocalJsonLocalization.delegate.directories = ['lib/i18n'];
     return MaterialApp(
+      supportedLocales: const [
+        Locale('en', 'US'),
+        Locale('id', 'ID'),
+      ],
+      localizationsDelegates: [
+        GlobalMaterialLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        LocalJsonLocalization.delegate
+      ],
+      localeResolutionCallback: (locale, supportedLocales) {
+        if (supportedLocales.contains(locale)) {
+          return locale;
+        }
+        return const Locale('en', 'US');
+      },
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primaryColor: ColorConstants.primaryColor,
