@@ -223,17 +223,18 @@ class _HomePageState extends State<HomePage> {
                           alignment: Alignment.centerLeft,
                           margin: const EdgeInsets.fromLTRB(10, 0, 0, 5),
                           child: Text(
-                            'Nickname: ${userChat.nickname}',
+                            userChat.nickname,
                             maxLines: 1,
                             style: const TextStyle(
-                                color: ColorConstants.primaryColor),
+                                color: ColorConstants.primaryColor,
+                                fontSize: 15),
                           ),
                         ),
                         Container(
                           alignment: Alignment.centerLeft,
                           margin: const EdgeInsets.fromLTRB(10, 0, 0, 0),
                           child: Text(
-                            '${'About-me'.i18n()}: ${userChat.aboutMe}',
+                            userChat.aboutMe.isEmpty ? '-' : userChat.aboutMe,
                             maxLines: 1,
                             style: const TextStyle(
                                 color: ColorConstants.primaryColor),

@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:amitofo_chatting/Constant/constants.dart';
 import 'package:amitofo_chatting/Model/model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -16,6 +17,12 @@ class ChatProvider {
 
   String? getPref(String key) {
     return prefs.getString(key);
+  }
+
+  UploadTask uploadFile(File image, String fileName) {
+    Reference reference = firebaseStorage.ref().child(fileName);
+    UploadTask uploadTask = reference.putFile(image);
+    return uploadTask;
   }
 
   Future<void> updateDataFirestore(String collectionPath, String docPath,
@@ -43,11 +50,11 @@ class ChatProvider {
         .doc(groupChatId)
         .collection(groupChatId)
         .doc(DateTime.now().millisecondsSinceEpoch.toString());
-
+    
     MessageChat messageChat = MessageChat(
       idFrom: currentUserId,
       idTo: peerId,
-      timestamp: DateTime.now().toString(),
+      timestamp: DateTime.now().toUtc().toString(),
       content: content,
       type: type,
     );
