@@ -44,3 +44,4 @@ flutter:
   assets:
     - images/
     - lib/i18n/
+    - images/icon/
